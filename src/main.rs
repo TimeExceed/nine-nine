@@ -81,11 +81,7 @@ fn main() {
     let page = parse_args();
 
     println!("\\documentclass[a4paper,landscape,notitlepage]{{article}}");
-    println!("\\usepackage[body={{24.62true cm,14.5true cm}},");
-    println!("             left=1cm,");
-    println!("             top=1cm,");
-    println!("             bottom=1cm,");
-    println!("             ]{{geometry}}");
+    println!("\\usepackage[a4paper,landscape,noheadfoot,left=1cm,top=1cm,right=1cm,bottom=1cm]{{geometry}}");
     println!("\\usepackage{{tabu}}");
     println!("\\renewcommand{{\\baselinestretch}}{{1.5}}");
     println!("\\pagestyle{{empty}}");
