@@ -60,15 +60,31 @@ fn gen_pair<R: Rng>(rng: &mut R) -> (i64, i64) {
     (gen_single(rng), gen_single(rng))
 }
 
+fn gen_plus<R: Rng>(rng: &mut R) {
+    let (a, b) = gen_pair(rng);
+    print!("{}+{}&=", a, b);
+}
+
+fn gen_cmp<R: Rng>(rng: &mut R) {
+    let (a, b) = gen_pair(rng);
+    print!("{}&\\quad{}", a, b);
+}
+
+fn gen_equation<R: Rng>(rng: &mut R) {
+    match rng.gen_range(0, 2) {
+        0 => gen_cmp(rng),
+        _ => gen_plus(rng),
+    }
+}
+
 fn one_page<R: Rng>(rng: &mut R) {
     println!("\\begin{{tabular}}{{rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl}}");
     for _ in 0..14 {
         for i in 0..5 {
-            let (a, b) = gen_pair(rng);
             if i > 0 {
                 print!("&");
             }
-            print!("{}+{}=&{}", a, b, a + b);
+            gen_equation(rng);
         }
         println!("\\\\");
     }
