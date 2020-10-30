@@ -62,7 +62,16 @@ fn gen_pair<R: Rng>(rng: &mut R) -> (i64, i64) {
 
 fn gen_plus<R: Rng>(rng: &mut R) {
     let (a, b) = gen_pair(rng);
-    print!("{}+{}&=", a, b);
+    print!("${}+{}$&=", a, b);
+}
+
+fn gen_minus<R: Rng>(rng: &mut R) {
+    let (a, b) = gen_pair(rng);
+    if a >= b {
+        print!("${}-{}$&=", a, b);
+    } else {
+        print!("${}-{}$&=", b, a);
+    }
 }
 
 fn gen_cmp<R: Rng>(rng: &mut R) {
@@ -71,9 +80,10 @@ fn gen_cmp<R: Rng>(rng: &mut R) {
 }
 
 fn gen_equation<R: Rng>(rng: &mut R) {
-    match rng.gen_range(0, 2) {
+    match rng.gen_range(0, 3) {
         0 => gen_cmp(rng),
-        _ => gen_plus(rng),
+        1 => gen_plus(rng),
+        _ => gen_minus(rng),
     }
 }
 
@@ -99,6 +109,7 @@ fn main() {
     println!("\\documentclass[a4paper,landscape,notitlepage]{{article}}");
     println!("\\usepackage[a4paper,landscape,noheadfoot,left=1cm,top=1cm,right=1cm,bottom=1cm]{{geometry}}");
     println!("\\usepackage{{tabu}}");
+    println!("\\usepackage{{amsmath}}");
     println!("\\renewcommand{{\\baselinestretch}}{{1.5}}");
     println!("\\pagestyle{{empty}}");
     println!("\\begin{{document}}");
