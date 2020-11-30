@@ -53,43 +53,82 @@ fn parse_single_arg(
 
 fn gen_single<R: Rng>(rng: &mut R) -> i64 {
     let a: u8 = rng.gen();
-    a as i64 % 10
+    a as i64 % 20
 }
 
-fn gen_pair<R: Rng>(rng: &mut R) -> (i64, i64) {
+fn gen_pair<R: Rng>(rng: &mut R) -> (i64, i64)  {
     (gen_single(rng), gen_single(rng))
 }
 
-fn gen_plus<R: Rng>(rng: &mut R) {
-    let (a, b) = gen_pair(rng);
-    print!("${}+{}$&=", a, b);
+fn gen_triple<R: Rng>(rng: &mut R) -> (i64, i64, i64) {
+    (gen_single(rng), gen_single(rng), gen_single(rng))
 }
 
-fn gen_minus<R: Rng>(rng: &mut R) {
+fn gen_plus<R: Rng>(rng: &mut R) -> bool {
+    let (a, b) = gen_pair(rng);
+    if a + b <= 20 {
+        print!("${}+{}$&=", a, b);
+        true
+    } else {
+        false
+    }
+}
+
+fn gen_minus<R: Rng>(rng: &mut R) -> bool {
     let (a, b) = gen_pair(rng);
     if a >= b {
         print!("${}-{}$&=", a, b);
     } else {
         print!("${}-{}$&=", b, a);
     }
+    true
 }
 
-fn gen_cmp<R: Rng>(rng: &mut R) {
+fn gen_cmp<R: Rng>(rng: &mut R) -> bool {
     let (a, b) = gen_pair(rng);
     print!("{}&\\quad{}", a, b);
+    true
+}
+
+fn gen_two_plus<R: Rng>(rng: &mut R) -> bool {
+    let (a, b, c) = gen_triple(rng);
+    if a + b + c > 20 {
+        return false
+    }
+    print!("${}+{}+{}$&=", a, b, c);
+    true
+}
+
+fn gen_two_minus<R: Rng>(rng: &mut R) -> bool {
+    let (a, b, c) = gen_triple(rng);
+    if a - b < 0 || a - b - c < 0 {
+        return false;
+    }
+    print!("${}-{}-{}$&=", a, b, c);
+    true
 }
 
 fn gen_equation<R: Rng>(rng: &mut R) {
-    match rng.gen_range(0, 3) {
-        0 => gen_cmp(rng),
-        1 => gen_plus(rng),
-        _ => gen_minus(rng),
+    let eq_funcs = vec![
+        Box::<fn(_: &mut R)->bool>::new(gen_cmp::<R>),
+        Box::new(gen_plus::<R>),
+        Box::new(gen_minus::<R>),
+        Box::new(gen_two_plus::<R>),
+        Box::new(gen_two_minus::<R>),
+    ];
+    loop {
+        let idx: usize = rng.gen_range(0, eq_funcs.len());
+        let f = &eq_funcs[idx];
+        let res = f(rng);
+        if res {
+            break
+        }
     }
 }
 
 fn one_page<R: Rng>(rng: &mut R) {
     println!("\\begin{{tabular}}{{rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl}}");
-    for _ in 0..14 {
+    for _ in 0..19 {
         for i in 0..5 {
             if i > 0 {
                 print!("&");
@@ -113,7 +152,7 @@ fn main() {
     println!("\\renewcommand{{\\baselinestretch}}{{1.5}}");
     println!("\\pagestyle{{empty}}");
     println!("\\begin{{document}}");
-    println!("\\huge");
+    println!("\\Large");
     for _ in 0..page {
         one_page(&mut rng);
     }
