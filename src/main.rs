@@ -66,22 +66,42 @@ fn gen_triple<R: Rng>(rng: &mut R) -> (i64, i64, i64) {
 
 fn gen_plus<R: Rng>(rng: &mut R) -> bool {
     let (a, b) = gen_pair(rng);
-    if a + b <= 20 {
-        print!("${}+{}$&=", a, b);
-        true
-    } else {
-        false
+    if a + b > 20 {
+        return false;
     }
+    let xs = to_latex(&[a, b, a + b], rng);
+    print!("${}+{}$&$={}$", xs[0], xs[1], xs[2]);
+    true
 }
 
 fn gen_minus<R: Rng>(rng: &mut R) -> bool {
     let (a, b) = gen_pair(rng);
-    if a >= b {
-        print!("${}-{}$&=", a, b);
-    } else {
-        print!("${}-{}$&=", b, a);
+    if a < b {
+        return false;
     }
+    let xs = to_latex(&[a, b, a - b], rng);
+    print!("${}-{}$&$={}$", xs[0], xs[1], xs[2]);
     true
+}
+
+fn to_latex<R: Rng>(xs: &[i64], rng: &mut R) -> Vec<String> {
+    let n = xs.len();
+    let j = rng.gen_range(0, n);
+    let xs: Vec<_> = xs.iter()
+        .enumerate()
+        .map(|(i, x)| {
+            if i == j {
+                if i + 1 < n {
+                    "\\fbox{\\textcolor{white}{00}}".to_string()
+                } else {
+                    "~".to_string()
+                }
+            } else {
+                format!("{}", x)
+            }
+        })
+        .collect();
+    xs
 }
 
 fn gen_cmp<R: Rng>(rng: &mut R) -> bool {
@@ -110,11 +130,11 @@ fn gen_two_minus<R: Rng>(rng: &mut R) -> bool {
 
 fn gen_equation<R: Rng>(rng: &mut R) {
     let eq_funcs = vec![
-        Box::<fn(_: &mut R)->bool>::new(gen_cmp::<R>),
-        Box::new(gen_plus::<R>),
+        Box::<fn(_: &mut R)->bool>::new(gen_plus::<R>),
         Box::new(gen_minus::<R>),
         Box::new(gen_two_plus::<R>),
         Box::new(gen_two_minus::<R>),
+        // Box::new(gen_cmp::<R>),
     ];
     loop {
         let idx: usize = rng.gen_range(0, eq_funcs.len());
@@ -127,7 +147,7 @@ fn gen_equation<R: Rng>(rng: &mut R) {
 }
 
 fn one_page<R: Rng>(rng: &mut R) {
-    println!("\\begin{{tabular}}{{rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl@{{\\qquad\\qquad}}rl}}");
+    println!("\\begin{{tabular}}{{rl@{{\\qquad\\quad}}rl@{{\\qquad\\quad}}rl@{{\\qquad\\quad}}rl@{{\\qquad\\quad}}rl}}");
     for _ in 0..19 {
         for i in 0..5 {
             if i > 0 {
@@ -149,6 +169,7 @@ fn main() {
     println!("\\usepackage[a4paper,landscape,noheadfoot,left=1cm,top=1cm,right=1cm,bottom=1cm]{{geometry}}");
     println!("\\usepackage{{tabu}}");
     println!("\\usepackage{{amsmath}}");
+    println!("\\usepackage{{color}}");
     println!("\\renewcommand{{\\baselinestretch}}{{1.5}}");
     println!("\\pagestyle{{empty}}");
     println!("\\begin{{document}}");
